@@ -1,2 +1,14 @@
 ---
-# tasks file for k8s-kubelet-gpu
+- name: add gpu support
+  lineinfile:
+    line: 'Environment="KUBELET_EXTRA_ARGS=--feature-gates=Accelerators=true"'
+    insertafter: '^Environment'
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  register: add_gpu_support
+
+- name: restart kubelet
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+  when: add_gpu_support.changed
